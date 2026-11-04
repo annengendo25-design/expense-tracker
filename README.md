@@ -43,4 +43,3 @@ expense-tracker/
 ## Author
 
 Ann Ng'endo
-Student
