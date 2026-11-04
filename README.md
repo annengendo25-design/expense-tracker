@@ -2,7 +2,7 @@
 
 ## About the Project
 
-Event Tracker is a simple and user-friendly expense tracking web application designed to help users manage their daily spending. It allows users to record expenses, organize them into categories, and monitor their daily spending through a clean and modern dashboard.
+Expense Tracker is a simple and user-friendly expense tracking web application designed to help users manage their daily spending. It allows users to record expenses, organize them into categories, and monitor their daily spending through a clean and modern dashboard.
 
 ## Features
 
