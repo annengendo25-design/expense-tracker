@@ -37,7 +37,7 @@ class ExpenseTracker{
         );
     }
     getTodayExpenses(){
-        const today = new Date().toLocaleDateString("en-CA");
+        const today = getTodayDate();
         return this.expenses.filter(
             expense => expense.date === today
         );
