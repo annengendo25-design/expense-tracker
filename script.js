@@ -67,13 +67,10 @@ class ExpenseTracker{
             return expense;
         });
     }
-}
+} 
 
-
-// CREATE AN EXPENSE TRACKER INSTANCE
 const tracker = new ExpenseTracker();
 
-// GET HTML ELEMENTS
 const expenseForm = document.getElementById("expense-form");
 const descriptionInput = document.getElementById("description");
 const amountInput = document.getElementById("amount");
@@ -84,8 +81,6 @@ const dailyTotal = document.getElementById("daily-total");
 const expenseCount = document.getElementById("expense-count");
 const currentDate = document.getElementById("current-date");
 
-
-// GET TODAY'S DATE IN YYYY-MM-DD FORMAT
 function getTodayDate() {
     const today = new Date();
 
@@ -96,8 +91,6 @@ function getTodayDate() {
     return `${year}-${month}-${day}`;
 }
 
-
-// DISPLAY CURRENT DATE
 currentDate.textContent = new Date().toLocaleDateString(
     "en-KE",
     {
