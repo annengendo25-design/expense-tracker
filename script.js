@@ -1,74 +1,3 @@
-class Expense{
-    constructor(description,amount,category,date){
-        this.id=Date.now();
-        this.description=description;
-        this.amount=Number(amount);
-        this.category=category;
-        this.date=date;
-    }
-}
-
-class ExpenseTracker{
-    constructor(){
-        this.expenses=this.loadExpenses();
-    }
-    addExpense(expense){
-        this.expenses=[...this.expenses,expense];
-        this.saveExpenses();
-    }
-    addExpenses(...newExpenses){
-        this.expenses=[...this.expenses,...newExpenses];
-        this.saveExpenses();
-    }
-    removeExpense(id){
-        this.expenses=this.expenses.filter(
-            expense=> expense.id !==id
-        );
-        this.saveExpenses();
-    }
-    filterByCategory(category){
-        return this.expenses.filter(
-            expense=> expense.category === category
-        );
-    }
-    getTotalExpenses(){
-        return this.expenses.reduce(
-            (total,expense) => total + expense.amount, 0
-        );
-    }
-    getTodayExpenses(){
-        const today = getTodayDate();
-        return this.expenses.filter(
-            expense => expense.date === today
-        );
-    }
-    getTodayTotal(){
-        return this.getTodayExpenses().reduce(
-            (total,expense) => total + expense.amount,0
-        );
-    }
-    saveExpenses(){
-        const expenses=this.expenses.map(
-            ({id,description,amount,category,date})=>
-            ({id,description,amount,category,date})
-        );
-        localStorage.setItem("expenses",JSON.stringify(expenses));
-    }
-    loadExpenses(){
-        const saveExpenses=JSON.parse(localStorage.getItem("expenses"))||[];
-        return saveExpenses.map(({id,description,amount,category,date})=>{
-            const expense=new Expense(
-                description,
-                amount,
-                category,
-                date
-            );
-            expense.id=id;
-            return expense;
-        });
-    }
-} 
-
 const tracker = new ExpenseTracker();
 
 const expenseForm = document.getElementById("expense-form");
@@ -79,17 +8,10 @@ const dateInput = document.getElementById("expense-date");
 
 const dailyTotal = document.getElementById("daily-total");
 const expenseCount = document.getElementById("expense-count");
+const filterSelect = document.getElementById("filter-category");
+const expenseList = document.getElementById("expense-list");
+const listStatus = document.getElementById("expense-list-status");
 const currentDate = document.getElementById("current-date");
-
-function getTodayDate() {
-    const today = new Date();
-
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
-}
 
 currentDate.textContent = new Date().toLocaleDateString(
     "en-KE",
@@ -105,13 +27,44 @@ dateInput.value = getTodayDate();
 
 
 function updateDashboard() {
-    const todayExpenses = tracker.getTodayExpenses();
-
     dailyTotal.textContent = `KES ${tracker.getTodayTotal().toFixed(2)}`;
 
-    expenseCount.textContent = todayExpenses.length;
+    expenseCount.textContent = tracker.expenses.length;
 }
 
+
+function renderExpenses() {
+    const category = filterSelect.value;
+    const visible = category === "All" ? tracker.expenses : tracker.filterByCategory(category);
+
+    const items = visible.map(({ id, description, amount, category, date }) => {
+        const item = document.createElement("li");
+        item.className = "expense-item flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between";
+
+        const details = document.createElement("span");
+        details.textContent = `${description} · ${category} · ${date} · KES ${amount.toFixed(2)}`;
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.textContent = "Delete";
+        deleteButton.setAttribute("aria-label", `Delete ${description}`);
+        deleteButton.addEventListener("click", () => {
+            tracker.removeExpense(id);
+            renderExpenses();
+            updateDashboard();
+            filterSelect.focus();
+        });
+
+        item.append(details, deleteButton);
+        return item;
+    });
+
+    expenseList.replaceChildren(...items);
+    listStatus.textContent = visible.length > 0 ? "" :
+        tracker.expenses.length === 0 ? "No expenses yet." : "No expenses in this category.";
+}
+
+filterSelect.addEventListener("change", renderExpenses);
 
 expenseForm.addEventListener("submit", function(event) {
 
@@ -122,7 +75,7 @@ expenseForm.addEventListener("submit", function(event) {
     const category = categoryInput.value;
     const date = dateInput.value;
 
-    if (!description || !category || !date || !Number.isFinite(amount) || amount <= 0) {
+    if (!description || !category || !date || !Number.isFinite(amount) || amount < 0.01) {
         alert("Please enter valid expense details.");
         return;
     }
@@ -135,6 +88,10 @@ expenseForm.addEventListener("submit", function(event) {
     );
 
     tracker.addExpense(expense);
+    if (filterSelect.value !== "All" && filterSelect.value !== category) {
+        filterSelect.value = "All";
+    }
+    renderExpenses();
 
     updateDashboard();
 
@@ -142,7 +99,7 @@ expenseForm.addEventListener("submit", function(event) {
 
     dateInput.value = getTodayDate();
 
-    alert("Expense added successfully!");
 });
 
 updateDashboard();
+renderExpenses();
